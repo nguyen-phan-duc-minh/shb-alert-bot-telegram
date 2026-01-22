@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  shb-alert-bot:
+    build: .
+    container_name: shb-alert-bot
+    restart: unless-stopped
+    
+    # Environment variables from .env file
+    env_file:
+      - .env
+    
+    # Mount volumes for persistent data and logs
+    volumes:
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Expose health check port (optional, for external monitoring)
+    ports:
+      - "8080:8080"
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
